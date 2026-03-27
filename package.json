@@ -1,0 +1,26 @@
+{
+  "name": "evolup-importer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node import.js",
+    "server": "node server.js",
+    "dev": "concurrently \"node server.js\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "debug": "DEBUG=pw:api node import.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "playwright": "^1.58.2",
+    "xlsx-js-style": "^1.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
