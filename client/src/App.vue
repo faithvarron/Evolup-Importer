@@ -10,9 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator'
 
 // ── State ─────────────────────────────────────────────────────────────────
-const email     = ref('')
-const password  = ref('')
-const site      = ref('')
+const email              = ref('')
+const password           = ref('')
+const site               = ref('')
+const kategorieCol       = ref('')
+const neuerProduktnameCol = ref('')
+const amazonUrlCol       = ref('')
 const file      = ref(null)
 const isDragging = ref(false)
 const jobId     = ref(null)
@@ -25,11 +28,17 @@ const canStart = computed(() => file.value && email.value.trim() && password.val
 
 // ── Persist credentials ───────────────────────────────────────────────────
 onMounted(() => {
-  email.value    = localStorage.getItem('evolup_email')    || ''
-  password.value = localStorage.getItem('evolup_password') || ''
+  email.value               = localStorage.getItem('evolup_email')                || ''
+  password.value            = localStorage.getItem('evolup_password')             || ''
+  kategorieCol.value        = localStorage.getItem('evolup_kategorie_col')        || ''
+  neuerProduktnameCol.value = localStorage.getItem('evolup_neuer_produktname_col') || ''
+  amazonUrlCol.value        = localStorage.getItem('evolup_amazon_url_col')       || ''
 })
-watch(email,    v => localStorage.setItem('evolup_email',    v.trim()))
-watch(password, v => localStorage.setItem('evolup_password', v))
+watch(email,               v => localStorage.setItem('evolup_email',                    v.trim()))
+watch(password,            v => localStorage.setItem('evolup_password',                 v))
+watch(kategorieCol,        v => localStorage.setItem('evolup_kategorie_col',            v.trim()))
+watch(neuerProduktnameCol, v => localStorage.setItem('evolup_neuer_produktname_col',    v.trim()))
+watch(amazonUrlCol,        v => localStorage.setItem('evolup_amazon_url_col',           v.trim()))
 
 // ── File handling ─────────────────────────────────────────────────────────
 function onDrop(e) {
@@ -71,6 +80,9 @@ async function startImport() {
   formData.append('email', email.value.trim())
   formData.append('password', password.value)
   formData.append('site', site.value.trim())
+  formData.append('kategorieCol', kategorieCol.value.trim())
+  formData.append('neuerProduktnameCol', neuerProduktnameCol.value.trim())
+  formData.append('amazonUrlCol', amazonUrlCol.value.trim())
 
   try {
     const res  = await fetch('/upload', { method: 'POST', body: formData })
@@ -139,12 +151,37 @@ function download() {
               <Input id="password" v-model="password" type="password" placeholder="••••••••" />
             </div>
           </div>
-          <div class="space-y-2">
-            <Label for="site">
-              Site to import
-              <span class="text-muted-foreground font-normal ml-1">(optional)</span>
-            </Label>
-            <Input id="site" v-model="site" type="text" placeholder="e.g. hochseeangeln-antares-de" />
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <Label for="site">
+                Site to import
+                <span class="text-muted-foreground font-normal ml-1">(optional)</span>
+              </Label>
+              <Input id="site" v-model="site" type="text" placeholder="e.g. hochseeangeln-antares-de" />
+            </div>
+            <div class="space-y-2">
+              <Label for="amazonUrlCol">
+                Amazon URL column
+                <span class="text-muted-foreground font-normal ml-1">(header name)</span>
+              </Label>
+              <Input id="amazonUrlCol" v-model="amazonUrlCol" type="text" placeholder="e.g. Amazon URL" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <Label for="kategorieCol">
+                Kategorie column
+                <span class="text-muted-foreground font-normal ml-1">(header name)</span>
+              </Label>
+              <Input id="kategorieCol" v-model="kategorieCol" type="text" placeholder="e.g. Kategorie" />
+            </div>
+            <div class="space-y-2">
+              <Label for="neuerProduktnameCol">
+                Neuer Produktname column
+                <span class="text-muted-foreground font-normal ml-1">(header name)</span>
+              </Label>
+              <Input id="neuerProduktnameCol" v-model="neuerProduktnameCol" type="text" placeholder="e.g. Neuer Produktname" />
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -15,6 +15,15 @@ const STYLES = {
   },
 };
 
+function formatAmazonUrl(raw) {
+  if (!raw) return raw;
+  const url = raw.toString().trim();
+  const m = url.match(/\/dp\/([A-Z0-9]{10})/i) || url.match(/\/gp\/product\/([A-Z0-9]{10})/i);
+  if (m) return `https://www.amazon.de/dp/${m[1].toUpperCase()}`;
+  if (/^[A-Z0-9]{10}$/i.test(url)) return `https://www.amazon.de/dp/${url.toUpperCase()}`;
+  return url;
+}
+
 function getHeaders(sheet, range) {
   const headers = {};
   for (let col = range.s.c; col <= range.e.c; col++) {
@@ -24,21 +33,34 @@ function getHeaders(sheet, range) {
   return headers;
 }
 
-function readUrls(filePath) {
+function readUrls(filePath, {
+  kategorieColName = 'Kategorie',
+  neuerProduktnameColName = 'Neuer Produktname',
+  amazonUrlColName = 'Amazon.de URL',
+} = {}, log = () => {}) {
   const wb = XLSX.readFile(filePath);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const range = XLSX.utils.decode_range(sheet['!ref']);
 
   const headers = getHeaders(sheet, range);
-  const kategorieCol = headers['Kategorie'];
-  const produktnameCol = headers['Neuer Produktname'];
+  log(`Excel headers found: ${Object.keys(headers).map(k => `"${k}"`).join(', ')}`);
+
+  const kategorieCol   = headers[kategorieColName];
+  const produktnameCol = headers[neuerProduktnameColName];
+  const urlColIdx      = headers[amazonUrlColName];
+
+  log(`Column mapping — Amazon URL: "${amazonUrlColName}" → col ${urlColIdx ?? 'NOT FOUND'} | Kategorie: "${kategorieColName}" → col ${kategorieCol ?? 'NOT FOUND'} | Neuer Produktname: "${neuerProduktnameColName}" → col ${produktnameCol ?? 'NOT FOUND'}`);
+
+  if (urlColIdx === undefined) {
+    log(`ERROR: Column "${amazonUrlColName}" not found in Excel headers. Check the "Amazon URL column" input matches exactly.`);
+    return [];
+  }
 
   const urls = [];
   for (let row = 1; row <= range.e.r; row++) {
-    const cellAddr = `F${row + 1}`;
-    const cell = sheet[cellAddr];
+    const cell = sheet[XLSX.utils.encode_cell({ r: row, c: urlColIdx })];
     if (cell && cell.v) {
-      const url = cell.v.toString().trim();
+      const url = formatAmazonUrl(cell.v.toString().trim());
 
       const getCellValue = (colIdx) => {
         if (colIdx === undefined) return null;

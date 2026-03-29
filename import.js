@@ -4,7 +4,9 @@ const fs = require('fs');
 const config = require('./config');
 const { readUrls, writeAllStatuses } = require('./excel-utils');
 
-const STORAGE_DIR = path.join(__dirname, '.auth');
+const STORAGE_DIR = process.env.ELECTRON_USER_DATA
+  ? path.join(process.env.ELECTRON_USER_DATA, '.auth')
+  : path.join(__dirname, '.auth');
 const STORAGE_FILE = path.join(STORAGE_DIR, 'session.json');
 const DELAY_BETWEEN_PRODUCTS = 3000;
 
@@ -344,8 +346,13 @@ async function runImport(excelFilePath, credentials, logFn) {
   const log = (msg) => { console.log(msg); if (logFn) logFn(msg); };
 
   log('=== Evolup Amazon Product Importer ===');
+  log(`Column config — amazonUrlCol: "${credentials.amazonUrlCol}" | kategorieCol: "${credentials.kategorieCol}" | neuerProduktnameCol: "${credentials.neuerProduktnameCol}"`);
 
-  const products = readUrls(excelFilePath);
+  const products = readUrls(excelFilePath, {
+    kategorieColName: credentials.kategorieCol || 'Kategorie',
+    neuerProduktnameColName: credentials.neuerProduktnameCol || 'Neuer Produktname',
+    amazonUrlColName: credentials.amazonUrlCol || 'Amazon.de URL',
+  }, log);
   log(`Found ${products.length} product URLs in Excel file.`);
   products.forEach((p, i) => log(`  ${i + 1}. [Row ${p.row}] ${p.url}`));
 

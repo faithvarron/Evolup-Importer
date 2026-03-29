@@ -1,14 +1,17 @@
 {
   "name": "evolup-importer",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Evolup Amazon Product Importer",
+  "main": "electron.js",
   "scripts": {
     "start": "node import.js",
     "server": "node server.js",
     "dev": "concurrently \"node server.js\" \"npm run dev --prefix client\"",
     "build": "npm run build --prefix client",
-    "debug": "DEBUG=pw:api node import.js"
+    "debug": "DEBUG=pw:api node import.js",
+    "electron": "electron .",
+    "dist": "electron-builder --mac dir && node build-dmg.js",
+    "dist:win": "electron-builder --win"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +24,50 @@
     "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "electron": "^41.1.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.evolup.importer",
+    "productName": "Evolup Importer",
+    "asar": false,
+    "afterPack": "./afterPack.js",
+    "mac": {
+      "target": [{ "target": "dir", "arch": ["arm64"] }],
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Evolup Importer",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "files": [
+      "electron.js",
+      "server.js",
+      "import.js",
+      "excel-utils.js",
+      "config.js",
+      "public/**",
+      "node_modules/**",
+      "package.json"
+    ],
+    "directories": {
+      "output": "/Users/christinefaithvarron/Desktop/evolup-dist"
+    }
   }
 }

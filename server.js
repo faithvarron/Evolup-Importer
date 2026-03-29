@@ -8,7 +8,9 @@ const { runImport } = require('./import');
 const app = express();
 const PORT = 3000;
 
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const UPLOADS_DIR = process.env.ELECTRON_USER_DATA
+  ? path.join(process.env.ELECTRON_USER_DATA, 'uploads')
+  : path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR);
 
 const storage = multer.diskStorage({
@@ -40,16 +42,25 @@ app.get('/', (req, res) => {
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-  const { email, password, site } = req.body;
+  const { email, password, site, kategorieCol, neuerProduktnameCol, amazonUrlCol } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
 
   const jobId = req.jobId || path.basename(req.file.filename, '.xlsx');
   jobs[jobId] = { status: 'pending', logs: [], outputFile: req.file.path };
 
+  console.log('[server] column config received:', { kategorieCol, neuerProduktnameCol, amazonUrlCol });
+
   res.json({ jobId });
 
   const excelPath = req.file.path;
-  const credentials = { email, password, site: site || '' };
+  const credentials = {
+    email,
+    password,
+    site: site || '',
+    kategorieCol: kategorieCol || '',
+    neuerProduktnameCol: neuerProduktnameCol || '',
+    amazonUrlCol: amazonUrlCol || '',
+  };
 
   runImport(excelPath, credentials, (msg) => {
     jobs[jobId].logs.push(msg);
