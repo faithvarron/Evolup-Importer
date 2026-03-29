@@ -10,8 +10,8 @@
     "build": "npm run build --prefix client",
     "debug": "DEBUG=pw:api node import.js",
     "electron": "electron .",
-    "dist": "electron-builder --mac dir && node build-dmg.js",
-    "dist:win": "electron-builder --win"
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:win": "electron-builder --win nsis"
   },
   "keywords": [],
   "author": "",
@@ -34,7 +34,7 @@
     "asar": false,
     "afterPack": "./afterPack.js",
     "mac": {
-      "target": [{ "target": "dir", "arch": ["arm64"] }],
+      "target": [{ "target": "dmg", "arch": ["arm64"] }],
       "category": "public.app-category.productivity",
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
@@ -67,7 +67,7 @@
       "package.json"
     ],
     "directories": {
-      "output": "/Users/christinefaithvarron/Desktop/evolup-dist"
+      "output": "dist"
     }
   }
 }
